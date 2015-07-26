@@ -1,0 +1,38 @@
+﻿{
+    "version": "1.0.0-*",
+    "description": "Owin.Security.OpenIdConnect.Server.TestsDnx Class Library",
+    "authors": [ "aspnet-contrib" ],
+    "tags": [ "OpenId Connect" ],
+    "projectUrl": "https://github.com/aspnet-contrib/AspNet.Security.OpenIdConnect.Server",
+    "licenseUrl": "",
+
+    "resource": "Certificate.pfx",
+
+    "commands": {
+        "test": "xunit.runner.dnx"
+    },
+
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.IdentityModel": "4.0.0.0",
+                "System.Linq": "4.0.0.0",
+                "System.Net": "4.0.0.0",
+                "System.Net.Http": "4.0.0.0",
+                "System.Net.Http.Formatting": "4.0.0.0",
+                "System.Runtime": "4.0.10.0",
+                "System.Xml": "4.0.0.0",
+                "System.Xml.Linq": "4.0.0.0"
+            },
+            "dependencies": {
+                "Microsoft.IdentityModel.Protocol.Extensions": "1.0.2.206221351",
+                "Microsoft.Owin.Testing": "3.0.1",
+                "Owin.Security.OpenIdConnect.Extensions": "1.0.0-*",
+                "Owin.Security.OpenIdConnect.Server": "1.0.0-*",
+                "xunit": "2.1.0-beta3-*",
+                "xunit.runner.dnx": "2.1.0-beta3-*",
+                "xunit.runner.visualstudio": "2.1.0-beta3-*"
+            }
+        }
+    }
+}
