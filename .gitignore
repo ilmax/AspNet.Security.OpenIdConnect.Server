@@ -5,11 +5,13 @@
 *.sln.ide/
 target/
 .nuget/
+.vs/
 
 # User-specific files
 *.suo
 *.user
 *.sln.docstates
+project.lock.json
 
 # Build results
 
@@ -158,4 +160,3 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
-.vs/
