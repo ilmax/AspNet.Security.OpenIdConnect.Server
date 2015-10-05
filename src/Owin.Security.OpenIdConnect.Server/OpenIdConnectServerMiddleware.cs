@@ -16,38 +16,13 @@ namespace Owin.Security.OpenIdConnect.Server {
     /// extension method.
     /// </summary>
     public class OpenIdConnectServerMiddleware : AuthenticationMiddleware<OpenIdConnectServerOptions> {
-        private readonly ILogger logger;
-
         /// <summary>
         /// Authorization Server middleware component which is added to an OWIN pipeline. This constructor is not
         /// called by application code directly, instead it is added by calling the the IAppBuilder UseOpenIdConnectServer 
         /// extension method.
         /// </summary>
-        public OpenIdConnectServerMiddleware(
-            OwinMiddleware next,
-            IAppBuilder app,
-            OpenIdConnectServerOptions options)
+        public OpenIdConnectServerMiddleware(OwinMiddleware next, IAppBuilder app, OpenIdConnectServerOptions options)
             : base(next, options) {
-            logger = app.CreateLogger<OpenIdConnectServerMiddleware>();
-            
-            if (Options.AuthorizationCodeFormat == null) {
-                Options.AuthorizationCodeFormat = app.CreateTicketFormat(
-                    typeof(OpenIdConnectServerMiddleware).FullName,
-                    "Authentication_Code", "v1");
-            }
-
-            if (Options.AccessTokenFormat == null) {
-                Options.AccessTokenFormat = app.CreateTicketFormat(
-                    "Microsoft.Owin.Security.OAuth",
-                    "Access_Token", "v1");
-            }
-
-            if (Options.RefreshTokenFormat == null) {
-                Options.RefreshTokenFormat = app.CreateTicketFormat(
-                    typeof(OpenIdConnectServerMiddleware).Namespace,
-                    "Refresh_Token", "v1");
-            }
-
             if (Options.RandomNumberGenerator == null) {
                 throw new ArgumentNullException("options.RandomNumberGenerator");
             }
@@ -80,6 +55,28 @@ namespace Owin.Security.OpenIdConnect.Server {
                         "options.AllowInsecureHttp is not set to true.", "options.Issuer");
                 }
             }
+
+            if (Options.Logger == null) {
+                Options.Logger = app.CreateLogger<OpenIdConnectServerMiddleware>();
+            }
+            
+            if (Options.AuthorizationCodeFormat == null) {
+                Options.AuthorizationCodeFormat = app.CreateTicketFormat(
+                    typeof(OpenIdConnectServerMiddleware).FullName,
+                    Options.AuthenticationType, "Authentication_Code", "v1");
+            }
+
+            if (Options.AccessTokenFormat == null) {
+                Options.AccessTokenFormat = app.CreateTicketFormat(
+                    "Microsoft.Owin.Security.OAuth",
+                    "Access_Token", "v1");
+            }
+
+            if (Options.RefreshTokenFormat == null) {
+                Options.RefreshTokenFormat = app.CreateTicketFormat(
+                    typeof(OpenIdConnectServerMiddleware).Namespace,
+                    Options.AuthenticationType, "Refresh_Token", "v1");
+            }
         }
 
         /// <summary>
@@ -87,7 +84,7 @@ namespace Owin.Security.OpenIdConnect.Server {
         /// </summary>
         /// <returns>A new instance of the request handler</returns>
         protected override AuthenticationHandler<OpenIdConnectServerOptions> CreateHandler() {
-            return new OpenIdConnectServerHandler(logger);
+            return new OpenIdConnectServerHandler();
         }
     }
 }

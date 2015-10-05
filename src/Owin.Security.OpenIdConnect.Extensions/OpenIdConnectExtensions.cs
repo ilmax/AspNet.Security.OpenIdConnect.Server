@@ -17,6 +17,18 @@ namespace Owin.Security.OpenIdConnect.Extensions {
     /// </summary>
     public static class OpenIdConnectExtensions {
         /// <summary>
+        /// True if the "response_type" parameter corresponds to the "none" response type.
+        /// See http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#none
+        /// </summary>
+        public static bool IsNoneFlow(this OpenIdConnectMessage message) {
+            if (message == null) {
+                throw new ArgumentNullException("message");
+            }
+
+            return string.Equals(message.ResponseType, OpenIdConnectConstants.ResponseTypes.None, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// True if the "response_type" parameter
         /// corresponds to the authorization code flow.
         /// See http://tools.ietf.org/html/rfc6749#section-4.1.1
@@ -117,8 +129,8 @@ namespace Owin.Security.OpenIdConnect.Extensions {
                 return false;
             }
 
-            // The code flow uses response_mode=query by default.
-            return message.IsAuthorizationCodeFlow();
+            // Code flow and "response_type=none" use response_mode=query by default.
+            return message.IsAuthorizationCodeFlow() || message.IsNoneFlow();
         }
 
         /// <summary>
@@ -314,10 +326,6 @@ namespace Owin.Security.OpenIdConnect.Extensions {
                 throw new ArgumentNullException("message");
             }
 
-            if (string.IsNullOrEmpty(identifier)) {
-                throw new ArgumentNullException("identifier");
-            }
-
             message.SetParameter("unique_id", identifier);
             return message;
         }
@@ -330,10 +338,6 @@ namespace Owin.Security.OpenIdConnect.Extensions {
         public static OpenIdConnectMessage SetRefreshToken(this OpenIdConnectMessage message, string token) {
             if (message == null) {
                 throw new ArgumentNullException("message");
-            }
-
-            if (string.IsNullOrEmpty(token)) {
-                throw new ArgumentNullException("token");
             }
 
             message.SetParameter("refresh_token", token);
