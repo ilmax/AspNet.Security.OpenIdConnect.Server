@@ -11,6 +11,7 @@ using Nancy.Server.Extensions;
 using Nancy.Server.Providers;
 using NWebsec.Owin;
 using Owin;
+using Owin.Security.OpenIdConnect.Server;
 
 namespace Nancy.Server {
     public class Startup {
@@ -57,15 +58,20 @@ namespace Nancy.Server {
             // See https://nwebsec.codeplex.com/wikipage?title=Configuring%20security%20headers&referringTitle=NWebsec
             app.UseXXssProtection(options => options.EnabledWithBlockMode());
 
-            app.UseOpenIdConnectServer(configuration => {
-                configuration.Provider = new AuthorizationProvider();
+            app.UseOpenIdConnectServer(options => {
+                options.AuthenticationType = OpenIdConnectDefaults.AuthenticationType;
+                options.AuthenticationMode = AuthenticationMode.Passive;
 
-                configuration.UseCertificate(certificate);
+                options.UseCertificate(certificate);
+
+                options.Provider = new AuthorizationProvider();
+                options.AccessTokenLifetime = TimeSpan.FromDays(14);
+                options.IdentityTokenLifetime = TimeSpan.FromMinutes(60);
+                options.AllowInsecureHttp = true;
 
                 // Note: see AuthorizationModule.cs for more
                 // information concerning ApplicationCanDisplayErrors.
-                configuration.Options.ApplicationCanDisplayErrors = true;
-                configuration.Options.AllowInsecureHttp = true;
+                options.ApplicationCanDisplayErrors = true;
             });
 
             app.UseNancy(options => options.Bootstrapper = new NancyBootstrapper());

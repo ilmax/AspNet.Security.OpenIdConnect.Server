@@ -31,7 +31,8 @@ namespace Mvc.Server.Controllers {
                 return View("Error", response);
             }
 
-            // Extract the authorization request from the cache, the query string or the request form.
+            // Extract the authorization request from the user's session, the query string or the request form.
+            // Note: OpenIdConnectServerHandler automatically saves the OpenID Connect request in the user's session.
             var request = OwinContext.GetOpenIdConnectRequest();
             if (request == null) {
                 return View("Error", new OpenIdConnectMessage {
@@ -39,12 +40,12 @@ namespace Mvc.Server.Controllers {
                     ErrorDescription = "An internal error has occurred"
                 });
             }
-
+            
             // Note: authentication could be theorically enforced at the filter level via AuthorizeAttribute
             // but this authorization endpoint accepts both GET and POST requests while the cookie middleware
             // only uses 302 responses to redirect the user agent to the login page, making it incompatible with POST.
-            // To work around this limitation, the OpenID Connect request is saved in the cache and will be
-            // restored in the other "Authorize" method, after the authentication process has been completed.
+            // To work around this limitation, the OpenID Connect request is saved in the user's session and will
+            // be restored in the other "Authorize" method, after the authentication process has been completed.
             if (User.Identity == null || !User.Identity.IsAuthenticated) {
                 return RedirectToAction("SignIn", "Authentication", new {
                     returnUrl = Url.Action("Authorize", new {
@@ -73,7 +74,8 @@ namespace Mvc.Server.Controllers {
         
         [Authorize, HttpPost, Route("~/connect/authorize/accept"), ValidateAntiForgeryToken]
         public async Task<ActionResult> Accept(CancellationToken cancellationToken) {
-            // Extract the authorization request from the cache, the query string or the request form.
+            // Extract the authorization request from the user's session, the query string or the request form.
+            // Note: OpenIdConnectServerHandler automatically saves the OpenID Connect request in the user's session.
             var request = OwinContext.GetOpenIdConnectRequest();
             if (request == null) {
                 return View("Error", new OpenIdConnectMessage {
@@ -84,7 +86,7 @@ namespace Mvc.Server.Controllers {
 
             // Create a new ClaimsIdentity containing the claims that
             // will be used to create an id_token, a token or a code.
-            var identity = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationType);
+            var identity = new ClaimsIdentity(OpenIdConnectDefaults.AuthenticationType);
 
             foreach (var claim in OwinContext.Authentication.User.Claims) {
                 // Allow ClaimTypes.Name to be added in the id_token.
@@ -116,7 +118,7 @@ namespace Mvc.Server.Controllers {
             // Create a new ClaimsIdentity containing the claims associated with the application.
             // Note: setting identity.Actor is not mandatory but can be useful to access
             // the whole delegation chain from the resource server (see ResourceController.cs).
-            identity.Actor = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationType);
+            identity.Actor = new ClaimsIdentity(OpenIdConnectDefaults.AuthenticationType);
             identity.Actor.AddClaim(ClaimTypes.NameIdentifier, application.ApplicationID);
             identity.Actor.AddClaim(ClaimTypes.Name, application.DisplayName, destination: "id_token token");
 
@@ -132,7 +134,8 @@ namespace Mvc.Server.Controllers {
 
         [Authorize, HttpPost, Route("~/connect/authorize/deny"), ValidateAntiForgeryToken]
         public ActionResult Deny(CancellationToken cancellationToken) {
-            // Extract the authorization request from the cache, the query string or the request form.
+            // Extract the authorization request from the user's session, the query string or the request form.
+            // Note: OpenIdConnectServerHandler automatically saves the OpenID Connect request in the user's session.
             var request = OwinContext.GetOpenIdConnectRequest();
             if (request == null) {
                 return View("Error", new OpenIdConnectMessage {
@@ -171,7 +174,7 @@ namespace Mvc.Server.Controllers {
             // When invoked, the logout endpoint might receive an unauthenticated request if the server cookie has expired.
             // When the client application sends an id_token_hint parameter, the corresponding identity can be retrieved
             // using AuthenticateAsync or using User when the authorization server is declared as AuthenticationMode.Active.
-            var identity = await OwinContext.Authentication.AuthenticateAsync(OpenIdConnectServerDefaults.AuthenticationType);
+            var identity = await OwinContext.Authentication.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationType);
 
             // Extract the logout request from the OWIN environment.
             var request = OwinContext.GetOpenIdConnectRequest();
@@ -198,7 +201,7 @@ namespace Mvc.Server.Controllers {
             // Note: you should always make sure the identities you return contain either
             // a 'sub' or a 'ClaimTypes.NameIdentifier' claim. In this case, the returned
             // identities always contain the name identifier returned by the external provider.
-            OwinContext.Authentication.SignOut(OpenIdConnectServerDefaults.AuthenticationType);
+            OwinContext.Authentication.SignOut(OpenIdConnectDefaults.AuthenticationType);
 
             return new HttpStatusCodeResult(200);
         }
@@ -223,6 +226,15 @@ namespace Mvc.Server.Controllers {
                 return await (from application in context.Applications
                               where application.ApplicationID == identifier
                               select application).SingleOrDefaultAsync(cancellationToken);
+            }
+        }
+
+        protected virtual string GenerateKey() {
+            using (var generator = RandomNumberGenerator.Create()) {
+                var buffer = new byte[16];
+                generator.GetBytes(buffer);
+
+                return new Guid(buffer).ToString();
             }
         }
     }

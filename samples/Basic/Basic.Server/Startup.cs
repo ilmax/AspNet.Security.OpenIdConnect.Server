@@ -1,29 +1,30 @@
-using System.Threading.Tasks;
+using System;
 using Microsoft.Owin;
 using Owin;
-using Owin.Security.OpenIdConnect.Server;
 
 namespace Basic.Server {
     public class Startup {
         public void Configuration(IAppBuilder app) {
-            app.UseOpenIdConnectServer(configuration => {
-                // Replace the default authorization endpoint to use auth.cshtml.
-                configuration.Options.AuthorizationEndpointPath = new PathString("/auth.cshtml");
+            app.UseOpenIdConnectServer(options => {
+                options.AccessTokenLifetime = TimeSpan.FromDays(14);
+                options.IdentityTokenLifetime = TimeSpan.FromMinutes(60);
 
-                // Turn AllowInsecureHttp to avoid rejected non-HTTPS requests.
-                configuration.Options.AllowInsecureHttp = true;
+                // Note: in a real world app, you'd probably prefer storing the X.509 certificate
+                // in the user or machine store. To keep this sample easy to use, the certificate
+                // is extracted from the Certificate.pfx file embedded in this assembly.
+                options.UseCertificate(
+                    assembly: typeof(Startup).Assembly,
+                    resource: "Basic.Server.Certificate.pfx",
+                    password: "Owin.Security.OpenIdConnect.Server");
 
-                // Set up an inline provider to control the OpenID Connect server.
-                configuration.Provider = new OpenIdConnectServerProvider {
-                    OnValidateClientRedirectUri = context => {
-                        if (context.ClientId == "myClient" && (string.IsNullOrEmpty(context.RedirectUri) ||
-                                                               context.RedirectUri == "http://localhost:57264/oidc")) {
-                            context.Validated("http://localhost:57264/oidc");
-                        }
+                options.UseOpaqueTokens();
 
-                        return Task.FromResult<object>(null);
-                    }
-                };
+                options.TokenEndpointPath = new PathString("/token");
+                options.AuthorizationEndpointPath = new PathString("/auth.cshtml");
+
+                options.Provider = new AuthorizationProvider();
+                options.AllowInsecureHttp = true;
+                options.ApplicationCanDisplayErrors = true;
             });
         }
     }
