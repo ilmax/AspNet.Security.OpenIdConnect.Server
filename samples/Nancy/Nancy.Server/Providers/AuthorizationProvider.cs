@@ -9,9 +9,9 @@ namespace Nancy.Server.Providers {
     public class AuthorizationProvider : OpenIdConnectServerProvider {
         public override async Task ValidateClientAuthentication(ValidateClientAuthenticationNotification notification) {
             if (string.IsNullOrEmpty(notification.ClientId) || string.IsNullOrEmpty(notification.ClientSecret)) {
-                notification.SetError(
+                notification.Rejected(
                     error: "invalid_request",
-                    errorDescription: "Missing credentials: ensure that your credentials were correctly " +
+                    description: "Missing credentials: ensure that your credentials were correctly " +
                                       "flowed in the request body or in the authorization header");
 
                 return;
@@ -24,17 +24,17 @@ namespace Nancy.Server.Providers {
                                          select entity).SingleOrDefaultAsync(notification.OwinContext.Request.CallCancelled);
 
                 if (application == null) {
-                    notification.SetError(
+                    notification.Rejected(
                         error: "invalid_client",
-                        errorDescription: "Application not found in the database: " +
+                        description: "Application not found in the database: " +
                                           "ensure that your client_id is correct");
                     return;
                 }
 
                 if (!string.Equals(notification.ClientSecret, application.Secret, StringComparison.Ordinal)) {
-                    notification.SetError(
+                    notification.Rejected(
                         error: "invalid_client",
-                        errorDescription: "Invalid credentials: ensure that you " +
+                        description: "Invalid credentials: ensure that you " +
                                           "specified a correct client_secret");
 
                     return;
@@ -52,18 +52,18 @@ namespace Nancy.Server.Providers {
                                          select entity).SingleOrDefaultAsync(notification.OwinContext.Request.CallCancelled);
 
                 if (application == null) {
-                    notification.SetError(
+                    notification.Rejected(
                         error: "invalid_client",
-                        errorDescription: "Application not found in the database: " +
+                        description: "Application not found in the database: " +
                                           "ensure that your client_id is correct");
                     return;
                 }
 
                 if (!string.IsNullOrEmpty(notification.RedirectUri)) {
                     if (!string.Equals(notification.RedirectUri, application.RedirectUri, StringComparison.Ordinal)) {
-                        notification.SetError(
+                        notification.Rejected(
                             error: "invalid_client",
-                            errorDescription: "Invalid redirect_uri");
+                            description: "Invalid redirect_uri");
 
                         return;
                     }
@@ -76,9 +76,9 @@ namespace Nancy.Server.Providers {
         public override async Task ValidateClientLogoutRedirectUri(ValidateClientLogoutRedirectUriNotification notification) {
             using (var context = new ApplicationContext()) {
                 if (!await context.Applications.AnyAsync(application => application.LogoutRedirectUri == notification.PostLogoutRedirectUri)) {
-                    notification.SetError(
+                    notification.Rejected(
                             error: "invalid_client",
-                            errorDescription: "Invalid post_logout_redirect_uri");
+                            description: "Invalid post_logout_redirect_uri");
 
                     return;
                 }

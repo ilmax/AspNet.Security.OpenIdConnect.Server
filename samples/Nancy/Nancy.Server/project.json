@@ -1,0 +1,38 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Nancy.Server Console Application",
+  "authors": [ "MDonini" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "commands": {
+    "Nancy.Server": "Nancy.Server"
+  },
+
+  "dependencies": {
+    "EntityFramework": "6.1.3",
+    "Microsoft.AspNet.Razor": "3.2.3",
+    "Microsoft.IdentityModel.Protocol.Extensions": "1.0.2.202250711",
+    "Microsoft.Owin.Security": "3.0.1",
+    "Microsoft.Owin.Security.Cookies": "3.0.1",
+    "Microsoft.Owin.Security.Jwt": "3.0.1",
+    "Microsoft.Owin.Security.OAuth": "3.0.1",
+    "Microsoft.Owin.SelfHost": "3.0.1",
+    "Nancy.MSOwinSecurity": "1.0.1",
+    "Nancy.Owin": "1.3.0",
+    "Nancy.Viewengines.Razor": "1.3.0",
+    "Newtonsoft.Json": "7.0.1",
+    "NWebsec.Owin": "1.0.0",
+    "System.IdentityModel.Tokens.Jwt": "4.0.2.202250711",
+    "Owin.Security.OpenIdConnect.Server": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.IdentityModel": "4.0.0.0"
+      }
+    }
+  }
+}
