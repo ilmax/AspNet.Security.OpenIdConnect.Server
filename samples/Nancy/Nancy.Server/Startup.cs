@@ -59,19 +59,19 @@ namespace Nancy.Server {
             app.UseXXssProtection(options => options.EnabledWithBlockMode());
 
             app.UseOpenIdConnectServer(options => {
-                options.AuthenticationType = OpenIdConnectDefaults.AuthenticationType;
-                options.AuthenticationMode = AuthenticationMode.Passive;
+                options.Options.AuthenticationType = OpenIdConnectServerDefaults.AuthenticationType;
+                options.Options.AuthenticationMode = AuthenticationMode.Passive;
 
                 options.UseCertificate(certificate);
 
                 options.Provider = new AuthorizationProvider();
-                options.AccessTokenLifetime = TimeSpan.FromDays(14);
-                options.IdentityTokenLifetime = TimeSpan.FromMinutes(60);
-                options.AllowInsecureHttp = true;
+                options.Options.AccessTokenLifetime = TimeSpan.FromDays(14);
+                options.Options.IdentityTokenLifetime = TimeSpan.FromMinutes(60);
+                options.Options.AllowInsecureHttp = true;
 
                 // Note: see AuthorizationModule.cs for more
                 // information concerning ApplicationCanDisplayErrors.
-                options.ApplicationCanDisplayErrors = true;
+                options.Options.ApplicationCanDisplayErrors = true;
             });
 
             app.UseNancy(options => options.Bootstrapper = new NancyBootstrapper());

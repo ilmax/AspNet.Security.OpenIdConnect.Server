@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Nancy.Bootstrapper;
+using Nancy.Diagnostics;
 using Nancy.Security;
 using Nancy.TinyIoc;
 using Nancy.ViewEngines.Razor;
@@ -26,6 +27,8 @@ namespace Nancy.Server
                 yield return typeof(RazorViewEngine);
             }
         }
+
+        protected override DiagnosticsConfiguration DiagnosticsConfiguration => new DiagnosticsConfiguration { Password = @"secret" };
 
         protected override IRootPathProvider RootPathProvider => new NancyRootPathProvider();
     }

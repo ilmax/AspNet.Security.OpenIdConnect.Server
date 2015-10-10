@@ -27,7 +27,8 @@
     "Newtonsoft.Json": "7.0.1",
     "NWebsec.Owin": "1.0.0",
     "System.IdentityModel.Tokens.Jwt": "4.0.2.202250711",
-    "Owin.Security.OpenIdConnect.Server": "1.0.0-*"
+    "Owin.Security.OpenIdConnect.Server": "1.0.0-*",
+    "Owin.Security.OpenIdConnect.Extensions": "1.0.0-*"
   },
 
   "frameworks": {

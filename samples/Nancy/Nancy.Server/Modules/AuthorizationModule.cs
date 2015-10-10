@@ -46,7 +46,8 @@ namespace Nancy.Server.Modules {
                 // only uses 302 responses to redirect the user agent to the login page, making it incompatible with POST.
                 // To work around this limitation, the OpenID Connect request is automatically saved in the user's session and will
                 // be restored in the other "Authorize" method, after the authentication process has been completed.
-                if (OwinContext.Authentication.User.Identity == null ||
+                if (OwinContext.Authentication.User == null ||
+                    OwinContext.Authentication.User.Identity == null ||
                    !OwinContext.Authentication.User.Identity.IsAuthenticated) {
                     return Response.AsRedirect("/signin?returnUrl=" + Uri.EscapeUriString("/connect/authorize?unique_id=" +
                                                                                           request.GetUniqueIdentifier()));
@@ -86,7 +87,7 @@ namespace Nancy.Server.Modules {
                 
                 // Create a new ClaimsIdentity containing the claims that
                 // will be used to create an id_token, a token or a code.
-                var identity = new ClaimsIdentity(OpenIdConnectDefaults.AuthenticationType);
+                var identity = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationType);
 
                 foreach (var claim in OwinContext.Authentication.User.Claims) {
                     // Allow ClaimTypes.Name to be added in the id_token.
@@ -118,7 +119,7 @@ namespace Nancy.Server.Modules {
                 // Create a new ClaimsIdentity containing the claims associated with the application.
                 // Note: setting identity.Actor is not mandatory but can be useful to access
                 // the whole delegation chain from the resource server (see ResourceController.cs).
-                identity.Actor = new ClaimsIdentity(OpenIdConnectDefaults.AuthenticationType);
+                identity.Actor = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationType);
                 identity.Actor.AddClaim(ClaimTypes.NameIdentifier, application.ApplicationID);
                 identity.Actor.AddClaim(ClaimTypes.Name, application.DisplayName, destination: "id_token token");
 
@@ -175,7 +176,7 @@ namespace Nancy.Server.Modules {
                 // When invoked, the logout endpoint might receive an unauthenticated request if the server cookie has expired.
                 // When the client application sends an id_token_hint parameter, the corresponding identity can be retrieved
                 // using AuthenticateAsync or using User when the authorization server is declared as AuthenticationMode.Active.
-                var identity = await OwinContext.Authentication.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationType);
+                var identity = await OwinContext.Authentication.AuthenticateAsync(OpenIdConnectServerDefaults.AuthenticationType);
 
                 // Extract the logout request from the OWIN environment.
                 var request = OwinContext.GetOpenIdConnectRequest();
@@ -202,7 +203,7 @@ namespace Nancy.Server.Modules {
                 // Note: you should always make sure the identities you return contain either
                 // a 'sub' or a 'ClaimTypes.NameIdentifier' claim. In this case, the returned
                 // identities always contain the name identifier returned by the external provider.
-                OwinContext.Authentication.SignOut(OpenIdConnectDefaults.AuthenticationType);
+                OwinContext.Authentication.SignOut(OpenIdConnectServerDefaults.AuthenticationType);
 
                 return HttpStatusCode.OK;
             };

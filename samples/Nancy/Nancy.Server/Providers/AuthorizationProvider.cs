@@ -7,7 +7,7 @@ using Owin.Security.OpenIdConnect.Server;
 
 namespace Nancy.Server.Providers {
     public class AuthorizationProvider : OpenIdConnectServerProvider {
-        public override async Task ValidateClientAuthentication(ValidateClientAuthenticationNotification notification) {
+        public override async Task ValidateClientAuthentication(ValidateClientAuthenticationContext notification) {
             if (string.IsNullOrEmpty(notification.ClientId) || string.IsNullOrEmpty(notification.ClientSecret)) {
                 notification.Rejected(
                     error: "invalid_request",
@@ -44,7 +44,7 @@ namespace Nancy.Server.Providers {
             }
         }
 
-        public override async Task ValidateClientRedirectUri(ValidateClientRedirectUriNotification notification) {
+        public override async Task ValidateClientRedirectUri(ValidateClientRedirectUriContext notification) {
             using (var context = new ApplicationContext()) {
                 // Retrieve the application details corresponding to the requested client_id.
                 var application = await (from entity in context.Applications
@@ -73,7 +73,7 @@ namespace Nancy.Server.Providers {
             }
         }
 
-        public override async Task ValidateClientLogoutRedirectUri(ValidateClientLogoutRedirectUriNotification notification) {
+        public override async Task ValidateClientLogoutRedirectUri(ValidateClientLogoutRedirectUriContext notification) {
             using (var context = new ApplicationContext()) {
                 if (!await context.Applications.AnyAsync(application => application.LogoutRedirectUri == notification.PostLogoutRedirectUri)) {
                     notification.Rejected(
@@ -87,7 +87,7 @@ namespace Nancy.Server.Providers {
             }
         }
 
-        public override Task MatchEndpoint(MatchEndpointNotification notification) {
+        public override Task MatchEndpoint(MatchEndpointContext notification) {
             // Note: by default, OpenIdConnectServerHandler only handles authorization requests made to the authorization endpoint.
             // This notification handler uses a more relaxed policy that allows extracting authorization requests received at
             // /connect/authorize/accept and /connect/authorize/deny (see AuthorizationController.cs for more information).

@@ -23,7 +23,7 @@
     "Microsoft.Owin.Security.Cookies": "3.0.1",
     "Newtonsoft.Json": "7.0.1",
     "System.IdentityModel.Tokens.Jwt": "4.0.2.202250711",
-    "Owin.Security.OpenIdConnect.Extensions" :  "1.0.0-beta2"
+    "Owin.Security.OpenIdConnect.Extensions" :  "1.0.0-*"
   },
 
   "frameworks": {
