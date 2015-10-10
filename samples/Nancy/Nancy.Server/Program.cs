@@ -12,7 +12,7 @@ namespace Nancy.Server
             // Start OWIN host 
             using (WebApp.Start<Startup>(url: baseAddress))
             {
-                Console.WriteLine("Press CTRL+C to stop the client");
+                Console.WriteLine("Press CTRL+C to stop the server");
                 Console.ReadLine();
             }
         }
